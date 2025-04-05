@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>moots tracker</title>
+  <link rel="shortcut icon" href="eyes.png" type="image/x-icon">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+
+    <nav class="bg-white shadow mb-6">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div class="text-xl font-bold text-blue-600">MOOTS TRACKER</div>
+          <button id="menu-btn" class="sm:hidden text-gray-700 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <ul id="menu" class="hidden sm:flex space-x-6 text-gray-700 font-medium">
+            <li><a href="index.html" class="hover:text-blue-600">Main</a></li>
+            <li><a href="tutorial.html" class="hover:text-blue-600">Tutorial</a></li>
+            <li><a href="profile.html" class="hover:text-blue-600">Contact</a></li>
+          </ul>
+        </div>
+        <ul id="mobile-menu" class="sm:hidden px-4 pb-3 hidden flex-col space-y-2 text-gray-700 font-medium">
+          <li><a href="index.html" class="block hover:text-blue-600">Main</a></li>
+          <li><a href="tutorial.html" class="block hover:text-blue-600">Tutorial</a></li>
+          <li><a href="profile.html" class="block hover:text-blue-600">Contact</a></li>
+        </ul>
+      </nav>
+
+
+
+
+  <script>
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>
+
+</body>
+</html>

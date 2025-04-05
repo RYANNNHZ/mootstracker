@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>moots tracker</title>
+  <link rel="shortcut icon" href="eyes.png" type="image/x-icon">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+    <nav class="bg-white shadow mb-6">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div class="text-xl font-bold text-blue-600">MOOTS TRACKER</div>
+          <button id="menu-btn" class="sm:hidden text-gray-700 focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <ul id="menu" class="hidden sm:flex space-x-6 text-gray-700 font-medium">
+            <li><a href="index.html" class="hover:text-blue-600">Main</a></li>
+            <li><a href="tutorial.html" class="hover:text-blue-600">Tutorial</a></li>
+            <li><a href="profile.html" class="hover:text-blue-600">Contact</a></li>
+          </ul>
+        </div>
+        <ul id="mobile-menu" class="sm:hidden px-4 pb-3 hidden flex-col space-y-2 text-gray-700 font-medium">
+          <li><a href="index.html" class="block hover:text-blue-600">Main</a></li>
+          <li><a href="tutorial.html" class="block hover:text-blue-600">Tutorial</a></li>
+          <li><a href="profile.html" class="block hover:text-blue-600">Contact</a></li>
+        </ul>
+      </nav>
+      
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Cek Followers dan Unfollowers Instagram</h1>
+
+    <div class="mb-6">
+      <input type="file" id="zipInput" accept=".zip" class="block mb-4">
+      <button onclick="cek()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Cek</button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6" id="stats">
+      <!-- Card Result Akan Diisi Dinamis -->
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div>
+        <h2 class="text-lg font-semibold mb-2">FOLLOWING</h2>
+        <div class="bg-white p-4 rounded shadow max-h-96 overflow-y-auto" id="followingList">Belum diupload.</div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-2">FOLLOWERS</h2>
+        <div class="bg-white p-4 rounded shadow max-h-96 overflow-y-auto" id="followersList">Belum diupload.</div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-2">YANG GAK FOLLOW BALIK</h2>
+        <div class="bg-white p-4 rounded shadow max-h-96 overflow-y-auto" id="unfollowersList">Belum diupload.</div>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-semibold mb-2">FOLLOWERS GAK DI FOLLOW</h2>
+        <div class="bg-white p-4 rounded shadow max-h-96 overflow-y-auto" id="notFollowedBackList">Belum diupload.</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
+
+    const zipInput = document.getElementById('zipInput');
+    const followersList = document.getElementById('followersList');
+    const followingList = document.getElementById('followingList');
+    const unfollowersList = document.getElementById('unfollowersList');
+    const notFollowedBackList = document.getElementById('notFollowedBackList');
+    const stats = document.getElementById('stats');
+
+    window.cek = async () => {
+      const file = zipInput.files[0];
+      if (!file) return alert("File belum dipilih!");
+
+      try {
+        const zip = await JSZip.loadAsync(file);
+        let following = [];
+        let followers = [];
+
+        for (const filename in zip.files) {
+          const entry = zip.files[filename];
+
+          if (filename.includes('following.json')) {
+            const content = await entry.async('string');
+            const data = JSON.parse(content);
+            following = data.relationships_following.map(item => item.string_list_data[0].value);
+          }
+
+          if (filename.includes('followers_1.json')) {
+            const content = await entry.async('string');
+            const data = JSON.parse(content);
+            followers = data.map(item => item.string_list_data[0].value);
+          }
+        }
+
+        if (following.length === 0 || followers.length === 0) {
+          alert('Gagal ambil data. File JSON-nya mungkin beda atau kosong.');
+          return;
+        }
+
+        const unfollowers = following.filter(user => !followers.includes(user));
+        const notFollowedBack = followers.filter(user => !following.includes(user));
+
+        stats.innerHTML = `
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="text-md font-semibold">Total Following</h3>
+            <p class="text-xl">${following.length}</p>
+          </div>
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="text-md font-semibold">Total Followers</h3>
+            <p class="text-xl">${followers.length}</p>
+          </div>
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="text-md font-semibold">Unfollowers</h3>
+            <p class="text-xl">${unfollowers.length}</p>
+          </div>
+          <div class="bg-white rounded shadow p-4">
+            <h3 class="text-md font-semibold">Followers yg Gak Di-Follow</h3>
+            <p class="text-xl">${notFollowedBack.length}</p>
+          </div>
+        `;
+
+        followingList.innerHTML = following.map(u => `
+  <div class="flex items-center gap-2 p-2 border-b">
+    <img src="https://avatar.iran.liara.run/username?username=${u}" alt="ig" class="w-5 h-5">
+    <a href="https://instagram.com/${u}" target="_blank" class="text-blue-600 hover:underline break-all">${u}</a>
+  </div>
+`).join('');
+
+followersList.innerHTML = followers.map(u => `
+  <div class="flex items-center gap-2 p-2 border-b">
+    <img src="https://avatar.iran.liara.run/username?username=${u}" alt="ig" class="w-5 h-5">
+    <a href="https://instagram.com/${u}" target="_blank" class="text-blue-600 hover:underline break-all">${u}</a>
+  </div>
+`).join('');
+
+unfollowersList.innerHTML = unfollowers.length
+  ? unfollowers.map(u => `
+    <div class="flex items-center gap-2 p-2 border-b">
+      <img src="https://avatar.iran.liara.run/username?username=${u}" alt="ig" class="w-5 h-5">
+      <a href="https://instagram.com/${u}" target="_blank" class="text-red-600 hover:underline break-all">${u}</a>
+    </div>
+  `).join('')
+  : '<div class="text-green-600 p-2">Semuanya follow balik, congrats bangsat!</div>';
+
+notFollowedBackList.innerHTML = notFollowedBack.length
+  ? notFollowedBack.map(u => `
+    <div class="flex items-center gap-2 p-2 border-b">
+      <img src="https://avatar.iran.liara.run/username?username=${u}" alt="ig" class="w-5 h-5">
+      <a href="https://instagram.com/${u}" target="_blank" class="text-yellow-600 hover:underline break-all">${u}</a>
+    </div>
+  `).join('')
+  : '<div class="text-green-600 p-2">Kamu udah follow semuanya balik. Mantap!</div>';
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+  </script>
+  <script>
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+</script>
+
+</body>
+</html>
